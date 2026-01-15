@@ -19,12 +19,17 @@ jobs:
       with:
         fetch-depth: 0
 
-    # 这里的脚本保持不变，之前的 PowerShell 生成脚本已经验证通过
     - name: Generate CMakeLists.txt
       shell: pwsh
       run: |
+        # 1. 设置工作区路径变量
         $dataPath = "${env:GITHUB_WORKSPACE}/data"
+        
+        # 【关键修复】：将所有反斜杠替换为正斜杠
+        # 避免 CMake 解析错误 "Invalid character escape '\a'"
+        $dataPath = $dataPath.Replace('\', '/')
 
+        # 2. 生成文件
         'cmake_minimum_required(VERSION 3.15)' | Out-File -Encoding utf8 "CMakeLists.txt"
         'project(CloudyBuild CXX)' | Add-Content -Encoding utf8 "CMakeLists.txt"
         '' | Add-Content -Encoding utf8 "CMakeLists.txt"
@@ -48,6 +53,7 @@ jobs:
         'endif()' | Add-Content -Encoding utf8 "CMakeLists.txt"
         '' | Add-Content -Encoding utf8 "CMakeLists.txt"
         
+        # 这里使用了已经转换为正斜杠的变量
         "target_compile_definitions(cloudy.exe PRIVATE \`"SYS_CONFIG=\`"cloudyconfig.h\`" \`"CLOUDY_DATA_PATH=$dataPath\`")" | Add-Content -Encoding utf8 "CMakeLists.txt"
         '' | Add-Content -Encoding utf8 "CMakeLists.txt"
         
@@ -62,7 +68,7 @@ jobs:
         '  /Zi      # 生成调试信息' | Add-Content -Encoding utf8 "CMakeLists.txt"
         ')' | Add-Content -Encoding utf8 "CMakeLists.txt"
 
-    # 修改部分：使用 Visual Studio 16 2019 生成器 + v141 工具集 (即 VS2017 编译器)
+    # 使用 VS2019 生成器 + VS2017 工具集
     - name: Configure CMake
       run: cmake -B build -G "Visual Studio 16 2019" -A x64 -T v141
 
