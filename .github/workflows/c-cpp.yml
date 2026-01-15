@@ -16,7 +16,7 @@ jobs:
     steps:
     # 1. 检出代码
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0  # 获取完整历史，以防代码需要版本号
 
@@ -95,7 +95,7 @@ jobs:
 
     # 5. 上传产物
     - name: Upload Artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: cloudy-win-vs2017
         path: source/build/Release/cloudy.exe
